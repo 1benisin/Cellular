@@ -1,36 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public enum EnergyType
-{
-	Kinetic,
-	Ballistic,
-	Laser,
-	Ice,
-	Electric,
-	Chemical,
-	NumberOfTypes
-}
-;
 
-public enum ShotType
-{
-	Single,
-	Dual,
-	Cluster,
-	Rear,
-	NumberOfTypes
-}
-;
 
-public enum ProjectileType
-{
-	Straight,
-	Seekeer,
-	ProximityMine,
-	NumberOfTypes
-}
-;
 
 
 
@@ -39,10 +11,9 @@ public class WeaponManager : MonoBehaviour
 				
 	public static WeaponManager i = null;		// singleton instance
 
-	public GameObject kineticProjectile;
 	public GameObject ballisticProjectile;
-	public GameObject iceProjectile;
-	public GameObject laserProjectile;
+	public GameObject frostProjectile;
+	public GameObject solarProjectile;
 	public GameObject chemicalProjectile;
 	public GameObject electricProjectile;
 
@@ -95,11 +66,10 @@ public class WeaponManager : MonoBehaviour
 	void InitializePrefabs ()
 	{
 		
-		prefab1 = new WeaponPrefab (1, ShotType.Single, EnergyType.Kinetic, ProjectileType.Straight);
-		prefab2 = new WeaponPrefab (2, ShotType.Single, EnergyType.Kinetic, ProjectileType.Straight);
-		prefab3 = new WeaponPrefab (3, ShotType.Single, EnergyType.Kinetic, ProjectileType.Straight);
+		prefab1 = new WeaponPrefab (1, ShotType.Single, EnergyType.Ballistic, ProjectileType.Straight);
+		prefab2 = new WeaponPrefab (2, ShotType.Single, EnergyType.Ballistic, ProjectileType.Straight);
+		prefab3 = new WeaponPrefab (3, ShotType.Single, EnergyType.Ballistic, ProjectileType.Straight);
 		curWeapon = prefab1;
-		Debug.Log (curWeapon);
 	}
 
 	void InitializeKeyCodes ()
@@ -204,14 +174,12 @@ public class WeaponManager : MonoBehaviour
 	{
 
 		switch (curWeapon.energyType) {
-		case EnergyType.Kinetic:
-			return kineticProjectile;
 		case EnergyType.Ballistic:
 			return ballisticProjectile;
-		case EnergyType.Ice:
-			return iceProjectile;
-		case EnergyType.Laser:
-			return laserProjectile;
+		case EnergyType.Frost:
+			return frostProjectile;
+		case EnergyType.Solar:
+			return solarProjectile;
 		case EnergyType.Chemical:
 			return chemicalProjectile;
 		case EnergyType.Electric:
