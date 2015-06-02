@@ -10,13 +10,12 @@ using TagFrenzy;
 public class AI : MonoBehaviour
 {
 	#region Variables
+	public GameObject testObj;
+
 	// Cache
-	[HideInInspector]
-	public Seeker
-		seeker;
-	[HideInInspector]
-	public Rigidbody2D
-		rb;
+	private Seeker seeker;
+	private Rigidbody2D rb;
+	protected GameObject player;
 
 	// radius of different zones around objext
 	public float personalSpace;
@@ -69,18 +68,25 @@ public class AI : MonoBehaviour
 		seeker = GetComponent<Seeker> ();
 		rb = GetComponent<Rigidbody2D> ();
 
+		// look for player and make sure you find one and only one
+		GameObject[] onePlayerOnly = GameObject.FindGameObjectsWithTag ("Player");
+		if (onePlayerOnly.Length > 1)
+			Debug.LogError ("More than one player found");
+		else if (onePlayerOnly.Length < 1)
+			Debug.LogError ("No player found");
+		else
+			player = onePlayerOnly [0];
+
+		// TODO enemy needs initial target
 		if (target == null)
 			Debug.Log ("No target found");
 
 		// Start a new path to the target position and return results to OnPathComplete method
 		seeker.StartPath (transform.position, target.position, onPathComplete);
 
+		// start and continuously update path
 		StartCoroutine (UpdatePath ());
 
-		//TODO remove: this is a test
-		GameObject closestObj = ClosestObjectWithTag (Tags.Obstacle);
-		closestObj.GetComponent<SpriteRenderer> ().color = Color.red;
-		// remove^
 	}
 
 
@@ -101,6 +107,9 @@ public class AI : MonoBehaviour
 		// Start a new path to the target position and return results to OnPathComplete method
 		seeker.StartPath (transform.position, target.position, onPathComplete);
 
+		//TODO remove: test code
+		testObj.transform.position = NearestHidingSpot ();
+
 		yield return new WaitForSeconds (1f / updatePathRate);
 		StartCoroutine (UpdatePath ());
 	}
@@ -118,15 +127,31 @@ public class AI : MonoBehaviour
 
 	#region Requests to AI
 
-//	Vector3 NearestHidingSpot ()
-//	{
-//		// find nearst obstacle TODO
-//		Vector2 curPos = new Vector2 (transform.position.x, transform.position.y);
-//		Collider2D[] surroundingObjects = Physics2D.OverlapCircleAll (curPos, visualSpace.radius);
-//
-//		// find direction away from player
-//		// find point in direction that leaves enough room for personal space
-//	}
+	Vector3 NearestHidingSpot ()
+	{
+		// find nearst obstacle 
+		GameObject nearestObstacle = ClosestObjectWithTag (Tags.Obstacle);
+		// find direction away from player
+		Vector3 direction = (nearestObstacle.transform.position - player.transform.position).normalized;
+
+		// take steps from obj center away from player until you reach a point that no longer intersects with obj
+		Bounds bounds = nearestObstacle.GetComponent<Collider2D> ().bounds;
+		Vector3 hidingSpot = nearestObstacle.transform.position;
+		while (bounds.Contains(hidingSpot)) {
+			hidingSpot += direction;
+		}
+
+		//add obj overage radius
+		Bounds enemyBounds = GetComponent<Collider2D> ().bounds;
+		float averageBounds = (enemyBounds.size.x + enemyBounds.size.y) * 0.5f;
+		hidingSpot += direction * averageBounds;
+
+		// add obj personal space
+		hidingSpot += direction * personalSpace;
+
+
+		return hidingSpot;
+	}
 
 	GameObject ClosestObjectWithTag (Tags t)
 	{
