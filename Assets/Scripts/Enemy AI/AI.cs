@@ -1,18 +1,27 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using Pathfinding;
+using TagFrenzy;
 
 [RequireComponent (typeof(Rigidbody2D))]
 [RequireComponent (typeof(Seeker))]
 
 public class AI : MonoBehaviour
 {
+	#region Variables
 	// Cache
-	public Seeker seeker;
-	public Rigidbody2D rb;
-	public CircleCollider2D personalSpace;
-	public CircleCollider2D visualSpace;
-	public CircleCollider2D attackSpace;
+	[HideInInspector]
+	public Seeker
+		seeker;
+	[HideInInspector]
+	public Rigidbody2D
+		rb;
+
+	// radius of different zones around objext
+	public float personalSpace;
+	public float visualSpace;
+	public float attackSpace;
 
 	// the AI's speed per second
 	public float Urgency = 300f;
@@ -51,6 +60,7 @@ public class AI : MonoBehaviour
 				currentState.OnEnable (gameObject, this);
 		}
 	} // currentState accessors
+	#endregion
 
 
 	void Start ()
@@ -66,12 +76,19 @@ public class AI : MonoBehaviour
 		seeker.StartPath (transform.position, target.position, onPathComplete);
 
 		StartCoroutine (UpdatePath ());
+
+		//TODO remove: this is a test
+		GameObject closestObj = ClosestObjectWithTag (Tags.Obstacle);
+		closestObj.GetComponent<SpriteRenderer> ().color = Color.red;
+		// remove^
 	}
+
 
 	void FixedUpdate ()
 	{
 		MoveToTarget ();
 	}
+
 
 	IEnumerator UpdatePath ()
 	{
@@ -88,6 +105,7 @@ public class AI : MonoBehaviour
 		StartCoroutine (UpdatePath ());
 	}
 
+
 	void onPathComplete (Path p)
 	{
 		Debug.Log ("We got a path. Did it have an error?" + p.error);
@@ -97,25 +115,49 @@ public class AI : MonoBehaviour
 		}
 	}
 
+
 	#region Requests to AI
 
-	Vector3 NearestHidingSpot ()
-	{
-		// find nearst obstacle TODO
-		Vector2 curPos = new Vector2 (transform.position.x, transform.position.y);
-		Collider2D[] surroundingObjects = Physics2D.OverlapCircleAll (curPos, visualSpace.radius);
+//	Vector3 NearestHidingSpot ()
+//	{
+//		// find nearst obstacle TODO
+//		Vector2 curPos = new Vector2 (transform.position.x, transform.position.y);
+//		Collider2D[] surroundingObjects = Physics2D.OverlapCircleAll (curPos, visualSpace.radius);
+//
+//		// find direction away from player
+//		// find point in direction that leaves enough room for personal space
+//	}
 
-		// find direction away from player
-		// find point in direction that leaves enough room for personal space
-	}
-
-	GameObject ClosestObjectWithTag ()
+	GameObject ClosestObjectWithTag (Tags t)
 	{
-		Vector2 curPos = new Vector2 (transform.position.x, transform.position.y);
-		Collider2D[] surroundingObjects = Physics2D.OverlapCircleAll (curPos, visualSpace.radius);
-//		Object nearestObject = TODO
-		return null;
-	}
+
+		// get all Gameobjects with that tag using TagFrenzy's Multitag class method
+		List<GameObject> ObjList = MultiTag.FindGameObjectsWithTags (t);
+
+		if (ObjList.Count < 1) {
+			Debug.Log ("list is empty");
+			return null;
+		}
+		
+		GameObject closestObject = null;
+		float closestDistance = float.PositiveInfinity;
+
+		// loop through list and find closest object
+		foreach (GameObject obj in ObjList) {
+			if (closestObject == null) {
+				closestObject = obj;
+				closestDistance = (obj.transform.position - transform.position).sqrMagnitude;
+			}
+
+			float distace = (obj.transform.position - transform.position).sqrMagnitude;
+
+			if (distace < closestDistance) {
+				closestDistance = distace;
+				closestObject = obj;
+			}
+		}
+		return closestObject;
+	} // takes a TagFrenzy Tag class object
 
 	#endregion
 
