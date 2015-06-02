@@ -4,17 +4,16 @@ using System.Collections;
 public class Hide : State
 {
 
-
-	void Start ()
+	public override void UpdateState ()
 	{
-		// find nearest hiding spot
-		// set target to that
-	
+		ai.pathfindingTarget = ai.NearestHidingSpot ();
+		ExitTriggersCheck ();
 	}
-	
-	// Update is called once per frame
-	public override void Update ()
+
+	public override void ExitTriggersCheck ()
 	{
-	
+//		if (ai.IsPointInsideVisualSpace (ai.player.transform.position))
+//			ai.SetToDefaultState ();
+
 	}
 }

@@ -13,7 +13,7 @@ public class Projectile : MonoBehaviour
 
 	void Start ()
 	{
-		energyType = WeaponManager.i.curWeapon.energyType;
+//		energyType = WeaponManager.i.curWeapon.energyType;
 		behaviour = WeaponManager.i.curWeapon.projectileType;
 
 		TurnOnBehaviorScript ();

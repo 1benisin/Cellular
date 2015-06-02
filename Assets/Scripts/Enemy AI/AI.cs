@@ -10,31 +10,37 @@ using TagFrenzy;
 public class AI : MonoBehaviour
 {
 	#region Variables
+	public bool debugMode = true;
 	public GameObject testObj;
 
 	// Cache
 	private Seeker seeker;
 	private Rigidbody2D rb;
-	protected GameObject player;
+	[HideInInspector]
+	public GameObject
+		player;
 
 	// radius of different zones around objext
-	public float personalSpace;
-	public float visualSpace;
-	public float attackSpace;
+	public float personalSpace = 1;
+	public float visualSpace = 2;
+	public float attackSpace = 3;
 
 	// the AI's speed per second
 	public float Urgency = 300f;
 	public ForceMode2D fMode;
 
 	// point to move to
-	public Transform target;
+	[HideInInspector]
+	public Vector3
+		pathfindingTarget;
 	// point to look & shoot at
-	protected Transform pointOfInterest;
+	private Transform pointOfInterest;
 
 	// the calculated path
 	private Path path;
 	// how many times per second we will update our path
 	private float updatePathRate = 1;
+	private float updateStateRate = 1;
 	// when end of path is reached
 	private bool pathIsEnded = false;
 	// the distance to current waypoint that is close enough to move on to next waypoint
@@ -54,9 +60,9 @@ public class AI : MonoBehaviour
 			currentState = value;
 			
 			if (currentState == null)
-				Debug.Log ("No state passed in");
+				Debug.LogWarning ("No state passed in");
 			else
-				currentState.OnEnable (gameObject, this);
+				currentState.WhenMadeCurrentState (gameObject, this);
 		}
 	} // currentState accessors
 	#endregion
@@ -77,38 +83,59 @@ public class AI : MonoBehaviour
 		else
 			player = onePlayerOnly [0];
 
-		// TODO enemy needs initial target
-		if (target == null)
-			Debug.Log ("No target found");
-
-		// Start a new path to the target position and return results to OnPathComplete method
-		seeker.StartPath (transform.position, target.position, onPathComplete);
+		// set initial state to default state
+		SetToDefaultState ();
+		if (CurrentState == null)
+			Debug.LogError ("No state found");
 
 		// start and continuously update path
 		StartCoroutine (UpdatePath ());
-
+		// start and continuously update state
+		StartCoroutine (UpdateState ());
+		
 	}
 
+	void OnDrawGizmosSelected ()
+	{
+		Gizmos.color = Color.blue;
+		Gizmos.DrawWireSphere (transform.position, personalSpace);
+		Gizmos.color = Color.yellow;
+		Gizmos.DrawWireSphere (transform.position, visualSpace);
+		Gizmos.color = Color.red;
+		Gizmos.DrawWireSphere (transform.position, attackSpace);
+		
+	}
 
 	void FixedUpdate ()
 	{
 		MoveToTarget ();
 	}
 
+	IEnumerator UpdateState ()
+	{
+		if (CurrentState == null) {
+			Debug.LogError ("currentState is missing");
+			yield return null;
+
+		} else {
+			CheckStateEnterTriggers ();
+			CurrentState.UpdateState ();
+			yield return new WaitForSeconds (updateStateRate);
+			StartCoroutine (UpdateState ());
+		}
+
+	}
 
 	IEnumerator UpdatePath ()
 	{
-		if (target == null) {
+		if (pathfindingTarget == null) {
+			// just chill in place
 			return false;
 		}
-		// find a new target if target has disappeared / been destroyed
 
 
 		// Start a new path to the target position and return results to OnPathComplete method
-		seeker.StartPath (transform.position, target.position, onPathComplete);
-
-		//TODO remove: test code
-		testObj.transform.position = NearestHidingSpot ();
+		seeker.StartPath (transform.position, pathfindingTarget, onPathComplete);
 
 		yield return new WaitForSeconds (1f / updatePathRate);
 		StartCoroutine (UpdatePath ());
@@ -124,10 +151,36 @@ public class AI : MonoBehaviour
 		}
 	}
 
+	#region State Triggers
+
+	void CheckStateEnterTriggers ()
+	{
+		HideTrigger ();
+	}
+
+	void HideTrigger ()
+	{
+		float dist = Vector3.Distance (player.transform.position, transform.position);
+		if (dist < visualSpace)
+			ChangeCurrentStateTo (new Hide ());
+	}
+
+	#endregion
+
 
 	#region Requests to AI
 
-	Vector3 NearestHidingSpot ()
+	public void ChangeCurrentStateTo (State newState)
+	{
+		CurrentState = newState;
+	}
+
+	public void SetToDefaultState ()
+	{
+		ChangeCurrentStateTo (new Hide ());
+	}
+
+	public Vector3 NearestHidingSpot ()
 	{
 		// find nearst obstacle 
 		GameObject nearestObstacle = ClosestObjectWithTag (Tags.Obstacle);
@@ -153,7 +206,7 @@ public class AI : MonoBehaviour
 		return hidingSpot;
 	}
 
-	GameObject ClosestObjectWithTag (Tags t)
+	public GameObject ClosestObjectWithTag (Tags t)
 	{
 
 		// get all Gameobjects with that tag using TagFrenzy's Multitag class method
@@ -184,13 +237,38 @@ public class AI : MonoBehaviour
 		return closestObject;
 	} // takes a TagFrenzy Tag class object
 
+	public bool IsPointInsidePersonalSpace (Vector3 p)
+	{
+		return Vector3.Distance (p, transform.position) < personalSpace;
+	}
+	public bool IsPointOutsidePersonalSpace (Vector3 p)
+	{
+		return Vector3.Distance (p, transform.position) > personalSpace;
+	}
+	public bool IsPointInsideVisualSpace (Vector3 p)
+	{
+		return Vector3.Distance (p, transform.position) < visualSpace;
+	}
+	public bool IsPointOutsideVisualSpace (Vector3 p)
+	{
+		return Vector3.Distance (p, transform.position) > visualSpace;
+	}
+	public bool IsPointInsideAttackSpace (Vector3 p)
+	{
+		return Vector3.Distance (p, transform.position) < attackSpace;
+	}
+	public bool IsPointOutsideAttackSpace (Vector3 p)
+	{
+		return Vector3.Distance (p, transform.position) > attackSpace;
+	}
+
 	#endregion
 
 	#region Subconcious Actions
 
 	void MoveToTarget ()
 	{
-		if (target == null) {
+		if (pathfindingTarget == null) {
 			Debug.Log ("No target found");
 			return;
 		}

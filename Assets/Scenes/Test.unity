@@ -399,7 +399,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 53644816}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.79999995, y: 11.8999996, z: 0}
+  m_LocalPosition: {x: 3.8599999, y: 12.0209999, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -429,13 +429,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db324c1dcd7744fd3b6ae9a363079be9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  debugMode: 1
   testObj: {fileID: 1612142919}
-  personalSpace: .5
-  visualSpace: 0
-  attackSpace: 0
+  player: {fileID: 0}
+  personalSpace: 1
+  visualSpace: 8
+  attackSpace: 12
   Urgency: 300
   fMode: 0
-  target: {fileID: 698732843}
+  pathfindingTarget: {x: 0, y: 0, z: 0}
 --- !u!114 &53644823
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1979,13 +1981,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db324c1dcd7744fd3b6ae9a363079be9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  debugMode: 1
   testObj: {fileID: 1503525966}
-  personalSpace: .5
-  visualSpace: 0
-  attackSpace: 0
+  player: {fileID: 0}
+  personalSpace: 2
+  visualSpace: 10
+  attackSpace: 15
   Urgency: 300
   fMode: 0
-  target: {fileID: 1503525967}
+  pathfindingTarget: {x: 0, y: 0, z: 0}
 --- !u!114 &1385531698
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2317,13 +2321,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db324c1dcd7744fd3b6ae9a363079be9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  debugMode: 1
   testObj: {fileID: 1706679952}
-  personalSpace: .5
-  visualSpace: 0
-  attackSpace: 0
+  player: {fileID: 0}
+  personalSpace: .699999988
+  visualSpace: 7
+  attackSpace: 10
   Urgency: 300
   fMode: 0
-  target: {fileID: 1706679953}
+  pathfindingTarget: {x: 0, y: 0, z: 0}
 --- !u!114 &1579118798
 MonoBehaviour:
   m_ObjectHideFlags: 0
