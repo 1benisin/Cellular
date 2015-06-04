@@ -48,8 +48,8 @@ public class AI : MonoBehaviour
 	// the waypoint we are moving toward
 	private int currentWaypoint;
 	// current behavior state
-	private State currentState;
-	public State CurrentState {  
+	private OutdatedState currentState;
+	public OutdatedState CurrentState {  
 		get {
 			return currentState;
 		}
@@ -170,7 +170,7 @@ public class AI : MonoBehaviour
 
 	#region Requests to AI
 
-	public void ChangeCurrentStateTo (State newState)
+	public void ChangeCurrentStateTo (OutdatedState newState)
 	{
 		CurrentState = newState;
 	}
@@ -269,7 +269,7 @@ public class AI : MonoBehaviour
 	void MoveToTarget ()
 	{
 		if (pathfindingTarget == null) {
-			Debug.Log ("No target found");
+			Debug.Log ("No target found. Don't move");
 			return;
 		}
 		

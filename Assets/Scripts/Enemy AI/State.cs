@@ -1,24 +1,21 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public abstract class State
+public abstract class State<T>
 {
+	protected T ownerObject;
+	protected StateMachine<T> ownerStateMachine;
 
-	protected GameObject ownerObject;
-	protected AI ai;
-	public float updateDelay = 1f;
+	public abstract void CheckForNewState ();
+	public abstract void Update ();
 
-	public abstract void UpdateState ();
-	public abstract void ExitTriggersCheck ();
-
-	public virtual void WhenMadeCurrentState (GameObject owner, AI ownerAi)
+	public virtual void OnEnable (T owner, StateMachine<T> newStateMachine)
 	{
 		ownerObject = owner;
-		ai = ownerAi;
+		ownerStateMachine = newStateMachine;
 	}
 
 	public virtual void OnDisable ()
 	{
-
 	}
 }
