@@ -11,6 +11,22 @@ public class Enemy : MonoBehaviour {
 	private Rigidbody2D rb;
 	private PathfindingAI pathfinder;
 	private StateMachine<Enemy> stateMachine;
+	[HideInInspector]
+	private Player
+		player;
+	public Player Player {
+		get {
+			if (player == null) {
+				Debug.LogWarning("Player does not exist");
+				return null;
+			}
+			return player;
+			} 
+		private set {
+			player = value;
+			}
+	}
+
 //      private Seeker seeker;                    // pathfinding agent
 	public Transform target;                  // target object
 //      public float targetChangeTolerance = 1f;  // how far target has to move before we recaculate a path to him
@@ -50,9 +66,15 @@ public class Enemy : MonoBehaviour {
 		// caching
 		pathfinder = new PathfindingAI(this);
 		rb = GetComponent<Rigidbody2D>();
+		stateMachine = new StateMachine<Enemy>(new PatrolPath(), this);
+		Player = Object.FindObjectOfType<Player>();
 
 		// start pathfinding
 		StartCoroutine(UpdatePath()); 
+	}
+
+	void Update() {
+		stateMachine.Update();
 	}
 
 	void FixedUpdate() {
@@ -75,8 +97,10 @@ public class Enemy : MonoBehaviour {
 			Debug.Log("No target found. Don't move");
 			return false;
 		}
-		if (pathfinder == null)
+		if (pathfinder == null) {
 			Debug.LogError("PathfinderAI missing");
+		}
+		
 
 		pathfinder.UpdatePath();
 

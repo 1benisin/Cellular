@@ -5,18 +5,21 @@ public class PlayerManager : MonoBehaviour {
 
 	public static PlayerManager i;
 
-	void Start () {
+
+	void Start() {
 		// sets up singleton
-		if(i == null) {
+		if (i == null) {
 			i = this;
 			DontDestroyOnLoad(gameObject);
+		} else {
+			Destroy(this);
 		}
-		else Destroy(this);
+
 
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void Update() {
 	
 	}
 
